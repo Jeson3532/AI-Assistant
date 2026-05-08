@@ -4,6 +4,7 @@ __pycache__/
 logs/*.log
 models/
 qdrant_storage/
+migrations/
 
 .vscode
 .env
@@ -26,4 +27,4 @@ qdrant_storage/
 *.exe
 *.shp
 
-!README.txt
+!README.md
