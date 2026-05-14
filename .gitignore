@@ -4,6 +4,7 @@ __pycache__/
 logs/*.log
 models/
 qdrant_storage/
+postgres_data/
 migrations/
 
 .vscode

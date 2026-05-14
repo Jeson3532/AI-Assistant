@@ -12,8 +12,8 @@ class QdrantConfig(BaseSettings):
     QDRANT_HOST: str = 'localhost'
     QDRANT_PORT: str
     COLLECTION_NAME: str = 'vector_db'
-    EMBEDDING_SIZE: int = 4096
-    EMBEDDING_MODEL: str = 'llama3'
+    EMBEDDING_SIZE: int = 1024
+    EMBEDDING_MODEL: str = 'bge-m3'
 
     model_config = SettingsConfigDict(env_file=env_file, extra='ignore')
 

@@ -8,10 +8,6 @@ from src.services.rag.utils.prompts import load_prompts
 
 prompts = load_prompts()
 
-llm = ChatOllama(
-    model='llama3'
-)
-
 
 def get_dialog_type(
         model: BaseChatModel,
@@ -31,7 +27,3 @@ def get_dialog_type(
     except Exception as e:
         logger.error(f"{e.__class__.__name__} | Ошибка при попытке получить тип диалога: {e}")
         return 'other'
-
-answer = get_dialog_type(llm, 'что с правками на основной странице?')
-
-print(answer)

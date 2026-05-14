@@ -1,13 +1,13 @@
 services:
   qdrant:
     image: qdrant/qdrant
-    container_name: qdrant-main
+    container_name: cdm-qdrant-main
     ports:
       - "${QDRANT_PORT}:6333"
     volumes:
       - ./qdrant_storage:/qdrant/storage
   postgres_db:
-    container_name: postgres-main
+    container_name: cdm-postgres-main
     image: postgres
     env_file: .env
     expose:
