@@ -11,7 +11,7 @@ prompts = load_prompts()
 GENERATE_PROMPTS = prompts.get("generate", {})
 
 
-def generate_response(
+async def generate_response(
         model: BaseChatModel,
         user_query: str,
         docs: list[Document],
@@ -29,7 +29,7 @@ def generate_response(
         template = ChatPromptTemplate.from_template(prompt)
         chain = template | model
 
-        response: AIMessage = chain.invoke({"query": user_query, "context": context})
+        response: AIMessage = await chain.ainvoke({"query": user_query, "context": context})
         return response
     except Exception as e:
         logger.error(f"{e.__class__.__name__} | Ошибка при генерации ответа от модели: {e}")

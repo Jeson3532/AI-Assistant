@@ -1,11 +1,11 @@
 from langchain.tools import tool
 
-@tool
+
 def call_operator(
         user_query: str,
         dialog_type: str,
-        response: str
+        response: str | None
 ):
     """Функция для передачи обращения оператору"""
 
-    return True
+    return "Передано оператору"

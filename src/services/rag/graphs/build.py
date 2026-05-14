@@ -9,6 +9,8 @@ from src.services.rag.nodes import base as base_nodes
 
 
 def build_graph(
+        reranker,
+        tokenizer,
         state: type[TypedDict],
         llm: BaseChatModel,
         vector_store: QdrantVectorStore):
@@ -16,7 +18,7 @@ def build_graph(
 
     graph.add_node("classification_dialog_type", partial(base_nodes.classify_node, llm=llm))
     graph.add_node("search", partial(base_nodes.hybrid_search_node, vector_store=vector_store))
-    graph.add_node("reranker", base_nodes.rerank_docs_node)
+    graph.add_node("reranker", partial(base_nodes.rerank_docs_node, reranker=reranker, tokenizer=tokenizer))
     graph.add_node("response", partial(base_nodes.generate_response_node, llm=llm))
     graph.add_node("clarify", partial(base_nodes.clarify_node, llm=llm))
     graph.add_node("call_operator", partial(base_nodes.call_operator_node, llm=llm))
@@ -32,7 +34,6 @@ def build_graph(
          "clarify": "clarify",
          "call_operator": "call_operator"}
     )
-    graph.add_edge("reranker", "response")
 
     # end edges
     graph.add_edge("clarify", END)

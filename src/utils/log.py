@@ -1,8 +1,12 @@
 import logging
 import os
 from pathlib import Path
+from src import ROOT_PATH
 
-ROOT_PATH = Path(os.getenv("PYTHONPATH"))
+logging.getLogger("httpx").setLevel(logging.ERROR)
+logging.getLogger("huggingface_hub.utils._http").setLevel(logging.ERROR)
+logging.getLogger("pyannote").setLevel(logging.ERROR)
+
 BASE_LOGS_DIR = str(ROOT_PATH / "logs")
 
 

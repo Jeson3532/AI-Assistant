@@ -2,8 +2,8 @@ import yaml
 from pathlib import Path
 import os
 from functools import lru_cache
+from src import ROOT_PATH
 
-ROOT_PATH = os.getenv("PYTHONPATH")
 BASE_PROMPTS_PATH = Path(ROOT_PATH) / 'config' / 'prompts.yaml'
 
 

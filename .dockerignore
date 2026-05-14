@@ -6,3 +6,9 @@ __pycache__/
 *.mp4
 *.wav
 *.log
+
+postgres_data/
+ollama_data/
+logs/
+qdrant_storage/
+hf_cache/

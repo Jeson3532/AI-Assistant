@@ -1,17 +1,17 @@
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from langchain_core.documents import Document
+from src.services.models.service import ModelService
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-reranker-v2-m3")
-reranker = AutoModelForSequenceClassification.from_pretrained("BAAI/bge-reranker-v2-m3").to(device).eval()
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 @torch.no_grad()
 def rerank_docs(
+        reranker,
+        tokenizer,
         query: str,
-        docs: list[Document],
+        docs: list[Document] ,
         top_k: int = 5,
         threshold: float = 0.0
 ) -> tuple[list[Document], list[float]]:
@@ -23,7 +23,7 @@ def rerank_docs(
         return_tensors='pt',
         max_length=512
     )
-    inputs = {k: v.to(device) for k, v in inputs.items()}  # чище чем цикл
+    inputs = {k: v.to(DEVICE) for k, v in inputs.items()}  # чище чем цикл
 
     scores = reranker(**inputs, return_dict=True).logits.view(-1).float()
     probs = torch.sigmoid(scores)

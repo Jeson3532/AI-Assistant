@@ -6,6 +6,8 @@ models/
 qdrant_storage/
 postgres_data/
 migrations/
+ollama_data/
+hf_cache/
 
 .vscode
 .env
@@ -27,5 +29,8 @@ migrations/
 *.txt
 *.exe
 *.shp
+
+*.rar
+*.zip
 
 !README.md

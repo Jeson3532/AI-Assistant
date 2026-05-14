@@ -7,31 +7,40 @@ from langchain_core.language_models import BaseChatModel
 from langchain_qdrant import QdrantVectorStore
 from src.services.rag.tools import operator
 from src.services.rag.utils.prompts import load_prompts
+from langchain_core.prompts import ChatPromptTemplate
 
 __all__ = ["classify_node", "hybrid_search_node", "rerank_docs_node", "generate_response_node"]
 PROMPTS = load_prompts()
 
 
-def classify_node(state: BasicState, llm: BaseChatModel):
-    dialog_type = get_dialog_type(llm, state['query'])
+async def classify_node(state: BasicState, llm: BaseChatModel):
+    dialog_type = await get_dialog_type(llm, state['query'])
     return {"dialog_type": dialog_type}
 
 
-def hybrid_search_node(state: BasicState, vector_store: QdrantVectorStore):
-    docs = hybrid_search(vector_store, state['query'], state['dialog_type'])
+async def hybrid_search_node(state: BasicState, vector_store: QdrantVectorStore):
+    docs = await hybrid_search(vector_store, state['query'], state['dialog_type'])
     return {"docs": docs}
 
 
-def rerank_docs_node(state: BasicState):
-    reranked_docs, scores = rerank_docs(state['query'], state['docs'])
+def rerank_docs_node(state: BasicState, reranker, tokenizer):
+    docs = state['docs']
+
+    if not docs:
+        return {
+            "reranked_docs": [],
+            "rerank_scores": []
+        }
+
+    reranked_docs, scores = rerank_docs(reranker, tokenizer, state['query'], docs)
     return {
         "reranked_docs": reranked_docs,
         "rerank_scores": scores
     }
 
 
-def generate_response_node(state: BasicState, llm: BaseChatModel):
-    response = generate_response(
+async def generate_response_node(state: BasicState, llm: BaseChatModel):
+    response = await generate_response(
         llm,
         state['query'],
         state['reranked_docs'],
@@ -40,13 +49,26 @@ def generate_response_node(state: BasicState, llm: BaseChatModel):
     return {"response": response}
 
 
-def clarify_node(state: BasicState, llm: BaseChatModel):
+async def clarify_node(state: BasicState, llm: BaseChatModel):
     prompt = PROMPTS.get("clarify")
-    chain = prompt | llm
-    response = chain.invoke({"query": state['query']})
+    template = ChatPromptTemplate.from_template(prompt)
+    chain = template | llm
+    response = await chain.ainvoke({"query": state['query']})
     return {"response": response}
 
 
-def call_operator_node(state: BasicState, llm: BaseChatModel):
-    operator.call_operator(state['query'], state['dialog_type'], state['response'])
-    return True
+async def call_operator_node(state: BasicState, llm: BaseChatModel):
+    prompt = PROMPTS.get("call_operator")
+    template = ChatPromptTemplate.from_template(prompt)
+    chain = template | llm
+    response = await chain.ainvoke({
+        "query": state['query']
+    })
+
+    # передача оператору
+    # call_result = operator.call_operator(
+    #     user_query=state['query'],
+    #     dialog_type=state['dialog_type'],
+    #     response=response.get("content", None))
+
+    return {"response": response}

@@ -1,4 +1,25 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    container_name: cdm-backend-main
+    env_file: .env
+    ports:
+      - "8000:8000"
+    #    expose:
+    #      - "8000"
+    environment:
+      - PYTHONPATH=.
+    volumes:
+      - .:/app
+      - ./migrations:/app/migrations
+      - ./hf_cache:/root/.cache/huggingface
+    restart: always
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
   qdrant:
     image: qdrant/qdrant
     container_name: cdm-qdrant-main
@@ -14,3 +35,24 @@ services:
       - "5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/18/docker
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cdm-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]

@@ -9,7 +9,7 @@ from src.services.rag.utils.prompts import load_prompts
 prompts = load_prompts()
 
 
-def get_dialog_type(
+async def get_dialog_type(
         model: BaseChatModel,
         user_query: str,
         prompt_name: str = 'classify_intent') -> str:
@@ -20,7 +20,7 @@ def get_dialog_type(
         template = ChatPromptTemplate.from_template(prompt)
         chain = template | model
 
-        response: AIMessage = chain.invoke({"query": user_query})
+        response: AIMessage = await chain.ainvoke({"query": user_query})
         if not response:
             return "other"
         return response.content.strip().lower()

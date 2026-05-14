@@ -1,9 +1,9 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 import os
+from src import ROOT_PATH
 
-root_path = Path(os.getenv("PYTHONPATH"))
-env_file = str(root_path / '.env')
+env_file = str(ROOT_PATH / '.env')
 
 
 class DBConfig(BaseSettings):

@@ -14,12 +14,12 @@ import pathlib
 from src.utils.log import logger
 
 # Загрузка qdrant
-client = load_client()
-vectorstore = load_vectorstore(client)
+# client = load_client()
+# vectorstore = load_vectorstore(client)
 #
 #
 # # Загрузка документов
-load_json_document(vectorstore, file_path='files/example.json')
+# load_json_document(vectorstore, file_path='files/example.json')
 #
 # # Проверка гибридного поиска
 # user_query = "Добавили блок с партнерами?"
@@ -35,13 +35,13 @@ load_json_document(vectorstore, file_path='files/example.json')
 # for doc in reranked_docs:
 #     print(doc.page_content)
 # Загрузка LLM
-llm = ChatOllama(
-    model='qwen2.5:14b'
-)
+# llm = ChatOllama(
+#     model='qwen2.5:14b'
+# )
 
 
-graph = build_graph(BasicState, llm, vectorstore)
-
-user_query = "что по правкам на основной странице?"
-response = graph.invoke({"query": user_query})
-pp(response)
+# graph = build_graph(BasicState, llm, vectorstore)
+#
+# user_query = "что по правкам на основной странице?"
+# response = graph.invoke({"query": user_query})
+# pp(response)

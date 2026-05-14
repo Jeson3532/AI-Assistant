@@ -1,0 +1,4 @@
+from .assistant import router as assistant_router
+from fastapi import APIRouter
+
+routers = [v for v in list(globals().values()) if isinstance(v, APIRouter)]
