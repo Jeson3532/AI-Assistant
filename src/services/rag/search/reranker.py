@@ -13,7 +13,7 @@ def rerank_docs(
         query: str,
         docs: list[Document],
         top_k: int = 5,
-        threshold: float = 0.5
+        threshold: float = 0.0
 ) -> tuple[list[Document], list[float]]:
     pairs = [[query, doc.page_content] for doc in docs]
     inputs = tokenizer(

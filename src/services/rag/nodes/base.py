@@ -5,8 +5,11 @@ from src.services.rag.search.reranker import rerank_docs
 from src.services.rag.service import generate_response
 from langchain_core.language_models import BaseChatModel
 from langchain_qdrant import QdrantVectorStore
+from src.services.rag.tools import operator
+from src.services.rag.utils.prompts import load_prompts
 
 __all__ = ["classify_node", "hybrid_search_node", "rerank_docs_node", "generate_response_node"]
+PROMPTS = load_prompts()
 
 
 def classify_node(state: BasicState, llm: BaseChatModel):
@@ -35,3 +38,15 @@ def generate_response_node(state: BasicState, llm: BaseChatModel):
         state['dialog_type']
     )
     return {"response": response}
+
+
+def clarify_node(state: BasicState, llm: BaseChatModel):
+    prompt = PROMPTS.get("clarify")
+    chain = prompt | llm
+    response = chain.invoke({"query": state['query']})
+    return {"response": response}
+
+
+def call_operator_node(state: BasicState, llm: BaseChatModel):
+    operator.call_operator(state['query'], state['dialog_type'], state['response'])
+    return True
