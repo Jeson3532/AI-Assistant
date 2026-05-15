@@ -28,18 +28,22 @@ async def lifespan(app: FastAPI):
     model_service = ModelService()
 
     # загрузка основной модели
-    logger.info("Загрузка основной модели...")
-    llm = model_service.load_model(model_name='qwen2.5:14b')
+    logger.info("Загрузка ML-моделей...")
+    llm = model_service.load_model(model_name='qwen2.5:0.5b')
+    classifier_llm = model_service.load_model(model_name="qwen2.5:0.5b")
+
     logger.info("Основная модель загружена")
-    logger.info("Warmup модели...")
+    logger.info("Warmup моделей...")
     await model_service.warmup(llm)
-    logger.info("Warmup модели завершен")
+    await model_service.warmup(classifier_llm)
+    logger.info("Warmup моделей завершен")
     # загрузка reranker + tokenizer
     logger.info("Загрузка reranker-model...")
     reranker, tokenizer = await model_service.load_reranker(device=DEVICE)
     logger.info("Reranker-model загружен")
+    logger.info(f"DEVICE: {DEVICE}")
     # сборка графа
-    app.state.llm_graph = build_graph(reranker, tokenizer, BasicState, llm, vectorstore)
+    app.state.llm_graph = build_graph(reranker, tokenizer, BasicState, llm, classifier_llm, vectorstore)
 
     logger.info("Загрузка роутеров...")
     for router in routers:

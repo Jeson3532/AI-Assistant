@@ -14,3 +14,9 @@ def confidence_router(state: BasicState):
         return "clarify"
 
     return "response"
+
+
+def dialog_type_router(state: BasicState):
+    if state['dialog_type'] == 'small_talk':
+        return "small_talk"
+    return "search"

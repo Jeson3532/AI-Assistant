@@ -45,3 +45,4 @@ from src.utils.log import logger
 # user_query = "что по правкам на основной странице?"
 # response = graph.invoke({"query": user_query})
 # pp(response)
+

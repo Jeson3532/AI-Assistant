@@ -8,31 +8,38 @@ from langchain_qdrant import QdrantVectorStore
 from src.services.rag.tools import operator
 from src.services.rag.utils.prompts import load_prompts
 from langchain_core.prompts import ChatPromptTemplate
+import asyncio
+from src.utils.log import logger
 
 __all__ = ["classify_node", "hybrid_search_node", "rerank_docs_node", "generate_response_node"]
 PROMPTS = load_prompts()
 
 
 async def classify_node(state: BasicState, llm: BaseChatModel):
+    logger.info("Классификация диалога")
     dialog_type = await get_dialog_type(llm, state['query'])
+    logger.info(f"Тип диалога: {dialog_type}")
     return {"dialog_type": dialog_type}
 
 
 async def hybrid_search_node(state: BasicState, vector_store: QdrantVectorStore):
+    logger.info("Гибридный поиск")
     docs = await hybrid_search(vector_store, state['query'], state['dialog_type'])
     return {"docs": docs}
 
 
-def rerank_docs_node(state: BasicState, reranker, tokenizer):
+async def rerank_docs_node(state: BasicState, reranker, tokenizer):
+    logger.info("Реранкер")
     docs = state['docs']
 
     if not docs:
-        return {
-            "reranked_docs": [],
-            "rerank_scores": []
-        }
+        return {"reranked_docs": [], "rerank_scores": []}
 
-    reranked_docs, scores = rerank_docs(reranker, tokenizer, state['query'], docs)
+    loop = asyncio.get_event_loop()
+    reranked_docs, scores = await loop.run_in_executor(
+        None,
+        rerank_docs, reranker, tokenizer, state['query'], docs
+    )
     return {
         "reranked_docs": reranked_docs,
         "rerank_scores": scores
@@ -40,6 +47,7 @@ def rerank_docs_node(state: BasicState, reranker, tokenizer):
 
 
 async def generate_response_node(state: BasicState, llm: BaseChatModel):
+    logger.info("Генерация ответа")
     response = await generate_response(
         llm,
         state['query'],
@@ -50,6 +58,7 @@ async def generate_response_node(state: BasicState, llm: BaseChatModel):
 
 
 async def clarify_node(state: BasicState, llm: BaseChatModel):
+    logger.info("Уточняющий вопрос")
     prompt = PROMPTS.get("clarify")
     template = ChatPromptTemplate.from_template(prompt)
     chain = template | llm
@@ -58,6 +67,7 @@ async def clarify_node(state: BasicState, llm: BaseChatModel):
 
 
 async def call_operator_node(state: BasicState, llm: BaseChatModel):
+    logger.info("Вызов оператора")
     prompt = PROMPTS.get("call_operator")
     template = ChatPromptTemplate.from_template(prompt)
     chain = template | llm
@@ -71,4 +81,13 @@ async def call_operator_node(state: BasicState, llm: BaseChatModel):
     #     dialog_type=state['dialog_type'],
     #     response=response.get("content", None))
 
+    return {"response": response}
+
+
+async def small_talk_node(state: BasicState, llm: BaseChatModel):
+    logger.info("Неформальный диалог")
+    prompt = PROMPTS.get("small_talk")
+    template = ChatPromptTemplate.from_template(prompt)
+    chain = template | llm
+    response = await chain.ainvoke({"query": state['query']})
     return {"response": response}

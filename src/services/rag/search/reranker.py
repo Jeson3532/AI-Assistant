@@ -2,6 +2,7 @@ import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from langchain_core.documents import Document
 from src.services.models.service import ModelService
+from src.utils.log import logger
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -23,6 +24,7 @@ def rerank_docs(
         return_tensors='pt',
         max_length=512
     )
+    logger.info("Работает Reranker!")
     inputs = {k: v.to(DEVICE) for k, v in inputs.items()}  # чище чем цикл
 
     scores = reranker(**inputs, return_dict=True).logits.view(-1).float()
@@ -38,4 +40,5 @@ def rerank_docs(
 
     rel_docs = [doc for doc, _ in rel_docs_scores]
     out_scores = [score for _, score in rel_docs_scores]
+    logger.info("Reranker закончил работу!")
     return rel_docs, out_scores

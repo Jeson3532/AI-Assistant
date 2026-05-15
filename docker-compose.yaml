@@ -19,6 +19,13 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
 
   qdrant:
     image: qdrant/qdrant
