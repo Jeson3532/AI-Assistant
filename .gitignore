@@ -1,11 +1,9 @@
 .venv/
 .idea/
 __pycache__/
-logs/*.log
 models/
 qdrant_storage/
 postgres_data/
-migrations/
 ollama_data/
 hf_cache/
 
@@ -29,6 +27,7 @@ hf_cache/
 *.txt
 *.exe
 *.shp
+*.log
 
 *.rar
 *.zip

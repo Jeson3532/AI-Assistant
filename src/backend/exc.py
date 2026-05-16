@@ -1,0 +1,6 @@
+class BaseDocumentError(Exception):
+    ...
+
+
+class FailUploadDocument(BaseDocumentError):
+    ...

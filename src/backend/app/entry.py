@@ -1,14 +1,15 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from src.utils.log import logger
-from src.services.rag.utils.prompts import load_prompts
-from src.services.rag.db.base import load_vectorstore, load_client
+from src.backend.utils.log import logger
+from src.backend.services.rag.utils.prompts import load_prompts
+from src.backend.services.rag.db.base import load_vectorstore, load_client, load_async_client
 from src.backend.routes import routers
-from langchain_ollama import ChatOllama
-from src.services.models.service import ModelService
-from src.services.rag.graphs.build import build_graph
-from src.services.rag.states.base import BasicState
+from src.backend.services.models.service import ModelService
+from src.backend.services.rag.graphs.build import build_graph
+from src.backend.services.rag.states.base import BasicState
+from src.backend.app.exceptions import setup_exceptions
 from dotenv import load_dotenv
+
 import torch
 
 load_dotenv()
@@ -18,10 +19,17 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.prompts = load_prompts()
-    # Загрузка qdrant
     logger.info("Загрузка qdrant...")
+    # загрузка клиентов
+    logger.info("Загрука клиентов...")
     qdrant_client = load_client()
+    async_qdrant_client = load_async_client()
     vectorstore = load_vectorstore(qdrant_client)
+    logger.info("Клиенты загружены")
+
+    # запись клиентов
+    app.state.qdrant_vectorstore = vectorstore
+    app.state.qdrant_async_client = async_qdrant_client
     logger.info("Qdrant загружен...")
 
     # Инициализация моделей и сборка RAG-графа
@@ -29,8 +37,8 @@ async def lifespan(app: FastAPI):
 
     # загрузка основной модели
     logger.info("Загрузка ML-моделей...")
-    llm = model_service.load_model(model_name='qwen2.5:0.5b')
-    classifier_llm = model_service.load_model(model_name="qwen2.5:0.5b")
+    llm = model_service.load_model(model_name='qwen2.5:1.5b', temperature=0.7, top_k=40)
+    classifier_llm = model_service.load_model(model_name="qwen2.5:1.5b", temperature=0.0)
 
     logger.info("Основная модель загружена")
     logger.info("Warmup моделей...")
@@ -62,3 +70,6 @@ app = FastAPI(
     description="Серверная часть ассистента для digital-агенства",
     lifespan=lifespan
 )
+
+# excps
+setup_exceptions(app)
