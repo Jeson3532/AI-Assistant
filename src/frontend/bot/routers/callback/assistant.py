@@ -13,6 +13,6 @@ async def goto_assistant_chat(cb: CallbackQuery, state: FSMContext):
     await state.set_state(Menus.ASSISTANT_CHAT)
 
     await cb.answer()
-    await cb.message.answer(msgs.ASSISTANT_START_MESSAGE)
+    await cb.message.answer(msgs.ASSISTANT_START_MESSAGE, parse_mode='html')
 
 

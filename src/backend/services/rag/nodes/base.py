@@ -47,46 +47,40 @@ async def rerank_docs_node(state: BasicState, reranker, tokenizer):
 
 async def generate_response_node(state: BasicState, llm: BaseChatModel):
     logger.info("Генерация ответа")
+    history = state.get("history") or []
+    logger.info(f"История диалога: {history}")
     response = await generate_response(
         llm,
         state['query'],
-        state['reranked_docs'],
-        state['dialog_type']
+        state.get("reranked_docs", []),
+        state['dialog_type'],
+        history
     )
     return {"response": response}
 
 
 async def clarify_node(state: BasicState, llm: BaseChatModel):
     logger.info("Уточняющий вопрос")
-    prompt = PROMPTS.get("clarify")
-    template = ChatPromptTemplate.from_template(prompt)
-    chain = template | llm
-    response = await chain.ainvoke({"query": state['query']})
+    response = await generate_response(
+        model=llm,
+        user_query=state['query'],
+        docs=state.get("reranked_docs", []),
+        dialog_type=state['dialog_type'],
+        history=state.get("history") or [],
+    )
     return {"response": response}
 
 
 async def call_operator_node(state: BasicState, llm: BaseChatModel):
     logger.info("Вызов оператора")
-    prompt = PROMPTS.get("call_operator")
-    template = ChatPromptTemplate.from_template(prompt)
-    chain = template | llm
-    response = await chain.ainvoke({
-        "query": state['query']
-    })
+    response = await generate_response(
+        model=llm,
+        user_query=state['query'],
+        docs=state.get("reranked_docs", []),
+        dialog_type=state['dialog_type'],
+        history=state.get("history") or [],
+    )
 
-    # передача оператору
-    # call_result = operator.call_operator(
-    #     user_query=state['query'],
-    #     dialog_type=state['dialog_type'],
-    #     response=response.get("content", None))
-
-    return {"response": response}
+    return {"response": response, "operator": True}
 
 
-async def small_talk_node(state: BasicState, llm: BaseChatModel):
-    logger.info("Неформальный диалог")
-    prompt = PROMPTS.get("small_talk")
-    template = ChatPromptTemplate.from_template(prompt)
-    chain = template | llm
-    response = await chain.ainvoke({"query": state['query']})
-    return {"response": response}

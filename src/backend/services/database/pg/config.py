@@ -9,7 +9,7 @@ env_file = str(ROOT_PATH / '.env')
 class DBConfig(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
-    POSTGRES_HOST: str = 'postgres-main'
+    POSTGRES_HOST: str = 'cdm-postgres-main'
     POSTGRES_PORT: str
     POSTGRES_DB: str
     POOL_SIZE: int = 16

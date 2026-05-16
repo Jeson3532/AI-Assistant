@@ -9,6 +9,7 @@ env_path = str(ROOT_PATH / '.env')
 
 class BotConfig(BaseSettings):
     BOT_TOKEN: str = None
+    OPERATOR_IDS: list[int] = []
 
     model_config = SettingsConfigDict(env_file=env_path, extra='ignore')
 
