@@ -1,7 +1,6 @@
 .venv/
 .idea/
 __pycache__/
-models/
 qdrant_storage/
 postgres_data/
 ollama_data/
