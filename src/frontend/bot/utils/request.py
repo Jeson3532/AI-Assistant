@@ -42,6 +42,7 @@ async def stream_assistant_query(
                         break
                     yield json.loads(data)
 
+
 async def save_dialog(
         user_id: int,
         username: str | None,
@@ -57,3 +58,30 @@ async def save_dialog(
             "operator": operator,
             "history": history,
         })
+
+
+async def get_analytics() -> dict:
+    async with ahttp.ClientSession(base_url=BACKEND_URL) as session:
+        async with session.get("/analytics/") as response:
+            if response.status != 200:
+                raise RuntimeError(f"Ошибка {response.status}: {await response.text()}")
+            return await response.json()
+
+
+async def get_journal(
+        limit: int = 5,
+        offset: int = 0,
+        operator: bool | None = None,
+        dialog_type: str | None = None,
+) -> dict:
+    params = {"limit": limit, "offset": offset}
+    if operator is not None:
+        params["operator"] = str(operator).lower()
+    if dialog_type:
+        params["dialog_type"] = dialog_type
+
+    async with ahttp.ClientSession(base_url=BACKEND_URL) as session:
+        async with session.get("/analytics/journal/", params=params) as response:
+            if response.status != 200:
+                raise RuntimeError(f"Ошибка {response.status}: {await response.text()}")
+            return await response.json()

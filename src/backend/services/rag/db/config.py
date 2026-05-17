@@ -9,7 +9,7 @@ from src.backend import ROOT_PATH
 from functools import cached_property
 
 env_file = str(ROOT_PATH / '.env')
-print(env_file)
+
 
 class QdrantConfig(BaseSettings):
     QDRANT_HOST: str = 'localhost'
@@ -32,5 +32,3 @@ class QdrantConfig(BaseSettings):
             encode_kwargs={"normalize_embeddings": True}
         )
 
-
-print(QdrantConfig())

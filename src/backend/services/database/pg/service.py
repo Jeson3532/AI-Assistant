@@ -35,3 +35,31 @@ class HistoryService:
         except Exception as e:
             logger.error(f"Общая ошибка в {self.__class__.__name__}. Traceback: {e}")
             raise
+
+    async def get_analytics(self) -> dict:
+        try:
+            return await self._db.history.get_analytics()
+        except Exception as e:
+            logger.error(f"Общая ошибка в {self.__class__.__name__}. Traceback: {e}")
+            raise
+
+    async def get_dialogs_filtered(
+            self,
+            user_id: int | None = None,
+            dialog_type: str | None = None,
+            operator: bool | None = None,
+            limit: int = 20,
+            offset: int = 0,
+    ) -> dict:
+        try:
+            items, total = await self._db.history.get_dialogs_filtered(
+                user_id=user_id,
+                dialog_type=dialog_type,
+                operator=operator,
+                limit=limit,
+                offset=offset,
+            )
+            return {"items": items, "total": total, "limit": limit, "offset": offset}
+        except Exception as e:
+            logger.error(f"Общая ошибка в {self.__class__.__name__}. Traceback: {e}")
+            raise
