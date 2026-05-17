@@ -6,10 +6,10 @@ USER_OPERATOR_CONNECTED = "✅ Оператор подключился. Ожид
 USER_OPERATOR_CLOSED = "🔴 Диалог с оператором <b>завершён</b>."
 
 
-def operator_new_ticket(ticket_id: int, user_name: str, dialog_type: str | None, query: str) -> str:
+def operator_new_ticket(ticket_id: int, username: str, dialog_type: str | None, query: str) -> str:
     return (
         f"🔔 <b>Новый тикет №{ticket_id}</b>\n\n"
-        f"👤 Пользователь: <i>{user_name}</i>\n"
+        f"👤 Пользователь: <i>{username}</i>\n"
         f"📂 Тип: <code>{dialog_type or 'неизвестно'}</code>\n\n"
         f"💬 Запрос:\n{query}"
     )

@@ -11,6 +11,7 @@ GENERATE_PROMPTS = prompts.get("generate", {})
 
 async def generate_response(
         model: BaseChatModel,
+        prompt: str | None,
         user_query: str,
         docs: list[Document],
         dialog_type: str = 'other',
@@ -18,14 +19,17 @@ async def generate_response(
 ):
     try:
         context = '\n'.join([doc.page_content for doc in docs])
-
-        prompt = GENERATE_PROMPTS.get(dialog_type, None)
         if not prompt:
-            prompt = GENERATE_PROMPTS.get("other")
-        if not prompt:
-            raise ValueError(f"Промт {dialog_type} не находится в файле с промтами")
-
-        messages = [SystemMessage(content=prompt.format(query=user_query, context=context))]
+            prompt = GENERATE_PROMPTS.get(dialog_type, None)
+            if not prompt:
+                prompt = GENERATE_PROMPTS.get("other")
+            if not prompt:
+                raise ValueError(f"Промт {dialog_type} не находится в файле с промтами")
+        # logger.info(f"ИСПОЛЬЗУЕМЫЙ ПРОМТ: {prompt}")
+        messages = [SystemMessage(content=prompt.format_map({
+            "query": user_query,
+            "context": context
+        }))]
 
         # история диалога
         for msg in (history or []):

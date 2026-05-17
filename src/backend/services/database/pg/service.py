@@ -1,0 +1,37 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.backend.services.database.pg.pg_service import DatabaseService
+from src.backend.schemas.history.input import DialogHistoryModel
+from src.backend.services.database.pg.tables import DialogHistory
+from src.backend.utils.log import logger
+from typing import Optional
+
+
+class HistoryService:
+    def __init__(self, db: DatabaseService):
+        self._db = db
+
+    async def save_dialog(self, data: DialogHistoryModel) -> DialogHistory:
+        try:
+            dialog = DialogHistory(
+                user_id=data.user_id,
+                username=data.username,
+                dialog_type=data.dialog_type,
+                operator=data.operator,
+                history=data.history
+            )
+            await self._db.history.save_dialog(dialog)
+            await self._db.commit()
+            await self._db.refresh(dialog)
+            return dialog
+        except Exception as e:
+            logger.error(f"Общая ошибка в {self.__class__.__name__}. Traceback: {e}")
+            raise
+
+    async def get_dialogs(self, user_id: int | None = None) -> list[DialogHistory]:
+        try:
+            if user_id:
+                return await self._db.history.get_dialogs_by_user(user_id)
+            return await self._db.history.get_all_dialogs()
+        except Exception as e:
+            logger.error(f"Общая ошибка в {self.__class__.__name__}. Traceback: {e}")
+            raise

@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart, Command
 from src.frontend.bot.storage import tickets
 from src.frontend.bot.fsm.groups import Menus
-from src.frontend.bot.utils.request import send_assistant_query
+from src.frontend.bot.utils.request import send_assistant_query, stream_assistant_query
 from src.frontend.bot.keyboards import operator as kb_operator
 from src.frontend.bot.templates import messages as tpl
 from src.frontend.bot.config import BotConfig
@@ -21,7 +21,8 @@ async def exit_chat(msg: Message, state: FSMContext):
 
 @router.message(Menus.ASSISTANT_CHAT, F.text.startswith("/"))
 async def block_commands_user(msg: Message):
-    await msg.answer("⚠️ Команды <b>недоступны</b> в режиме чата.\nДля выхода из чата используйте <b>/exit</b>", parse_mode='html')
+    await msg.answer("⚠️ Команды <b>недоступны</b> в режиме чата.\nДля выхода из чата используйте <b>/exit</b>",
+                     parse_mode='html')
 
 
 @router.message(Menus.ASSISTANT_CHAT)
@@ -39,15 +40,29 @@ async def handle_message(msg: Message, state: FSMContext):
     data = await state.get_data()
     history: list[dict] = data.get("history", [])
 
+    status_msg = await msg.answer("🔍 <b>Определяем тип обращения...</b>", parse_mode="html")
+    response = None
+
+    async for event in stream_assistant_query(msg.text, history):
+        if event['type'] == 'status':
+            await status_msg.edit_text(event['text'], parse_mode="html")
+
+        elif event['type'] == 'result':
+            response = event
+
+    if not response:
+        await status_msg.edit_text("❌ Что-то пошло не так. Попробуйте ещё раз.", parse_mode="html")
+        return
     # запрос
-    response = await send_assistant_query(msg.text, history)
+    # response = await send_assistant_query(msg.text, history)
     answer = response['model_response']
+
+    await status_msg.delete()
+    await msg.answer(answer)
 
     history.append({"role": "user", "text": msg.text})
     history.append({"role": "assistant", "text": answer})
     await state.update_data(history=history)
-
-    await msg.answer(answer)
 
     # создание тикета если есть вызов оператора
     if response.get('operator'):
@@ -63,7 +78,7 @@ async def handle_message(msg: Message, state: FSMContext):
                 chat_id=id_,
                 text=tpl.operator_new_ticket(
                     ticket_id=ticket.ticket_id,
-                    user_name=msg.from_user.full_name,
+                    username=msg.from_user.full_name,
                     dialog_type=ticket.dialog_type,
                     query=ticket.query
                 ),

@@ -51,6 +51,7 @@ async def generate_response_node(state: BasicState, llm: BaseChatModel):
     logger.info(f"История диалога: {history}")
     response = await generate_response(
         llm,
+        None,
         state['query'],
         state.get("reranked_docs", []),
         state['dialog_type'],
@@ -63,9 +64,9 @@ async def clarify_node(state: BasicState, llm: BaseChatModel):
     logger.info("Уточняющий вопрос")
     response = await generate_response(
         model=llm,
+        prompt=PROMPTS.get("clarify"),
         user_query=state['query'],
         docs=state.get("reranked_docs", []),
-        dialog_type=state['dialog_type'],
         history=state.get("history") or [],
     )
     return {"response": response}
@@ -75,9 +76,9 @@ async def call_operator_node(state: BasicState, llm: BaseChatModel):
     logger.info("Вызов оператора")
     response = await generate_response(
         model=llm,
+        prompt=PROMPTS.get("call_operator"),
         user_query=state['query'],
-        docs=state.get("reranked_docs", []),
-        dialog_type=state['dialog_type'],
+        docs=[],
         history=state.get("history") or [],
     )
 

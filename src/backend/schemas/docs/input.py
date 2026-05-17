@@ -7,3 +7,5 @@ class UploadDocsModel(BaseModel):
     type: str = Field(..., description="Тип документа")
     chunk_size: int = Field(500, description="Размер одного чанка при сплите")
 
+
+

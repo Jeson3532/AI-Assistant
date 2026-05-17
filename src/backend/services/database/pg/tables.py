@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
     ...
 
 
-class Users(Base):
+class KnowledgeBase(Base):
     __tablename__ = "knowledge_base"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -16,6 +16,18 @@ class Users(Base):
     source: Mapped[str] = mapped_column(nullable=True, unique=True)
     content: Mapped[str] = mapped_column(TEXT, nullable=False)
 
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True,
-                                                     comment="дополнительная информация о документе")
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    doc_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True,
+                                                         comment="дополнительная информация о документе")
+    finished_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class DialogHistory(Base):
+    __tablename__ = "dialog_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(nullable=False, index=True)
+    username: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    dialog_type: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    operator: Mapped[bool] = mapped_column(Boolean, default=False)
+    history: Mapped[dict] = mapped_column(JSON, nullable=False)
+    finished_at: Mapped[datetime] = mapped_column(server_default=func.now())

@@ -8,6 +8,7 @@ from src.backend.services.models.service import ModelService
 from src.backend.services.rag.graphs.build import build_graph
 from src.backend.services.rag.states.base import BasicState
 from src.backend.app.exceptions import setup_exceptions
+from src.backend.services.database.pg.engine import init_db
 from dotenv import load_dotenv
 
 import torch
@@ -18,6 +19,9 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # init db tables (test, в проде миграции)
+    # await init_db()
+    ### блок работы с инициализацией инструментов RAG-пайплайна
     app.state.prompts = load_prompts()
     logger.info("Загрузка qdrant...")
     # загрузка клиентов
@@ -53,6 +57,7 @@ async def lifespan(app: FastAPI):
     # сборка графа
     app.state.llm_graph = build_graph(reranker, tokenizer, BasicState, llm, classifier_llm, vectorstore)
 
+    ### блок компонентов FastAPI
     logger.info("Загрузка роутеров...")
     for router in routers:
         app.include_router(router)
