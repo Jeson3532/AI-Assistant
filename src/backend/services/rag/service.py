@@ -25,7 +25,6 @@ async def generate_response(
                 prompt = GENERATE_PROMPTS.get("other")
             if not prompt:
                 raise ValueError(f"Промт {dialog_type} не находится в файле с промтами")
-        # logger.info(f"ИСПОЛЬЗУЕМЫЙ ПРОМТ: {prompt}")
         messages = [SystemMessage(content=prompt.format_map({
             "query": user_query,
             "context": context

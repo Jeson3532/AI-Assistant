@@ -5,27 +5,19 @@ from src.backend.schemas.assistant.response import AssistantResponse
 from src.backend.dependencies.rag import get_llm_graph
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages.ai import AIMessage
+from src.backend.dependencies.auth import auth_user
+from src.backend.utils.enums import NodeStatus, FINAL_NODES
 import json
 
 router = APIRouter(prefix='/assistant', tags=['Assistant', 'Ассистент'])
-
-NODE_STATUS_MAP = {
-    "classification_dialog_type": "🔍 Определяем тип обращения...",
-    "search": "📚 Ищем ответ в базе знаний...",
-    "reranker": "⚙️ Готовим результаты...",
-    "response": "✍️ Формируем ответ...",
-    "clarify": "🤔 Уточняем детали...",
-    "call_operator": "👨‍💼 Передаём менеджеру...",
-    "small_talk": "💬 Отвечаем...",
-}
-
-FINAL_NODES = {"response", "clarify", "call_operator", "small_talk"}
 
 
 @router.post("/", response_model=AssistantResponse)
 async def send_query(
         body: SendQueryModel,
-        llm: CompiledStateGraph = Depends(get_llm_graph)):
+        llm: CompiledStateGraph = Depends(get_llm_graph),
+        authenticated: str = Depends(auth_user)
+):
     result = await llm.ainvoke({
         "query": body.query,
         "history": [m.model_dump() for m in body.history]
@@ -43,7 +35,9 @@ async def send_query(
 @router.post("/stream/")
 async def stream_query(
         body: SendQueryModel,
-        llm: CompiledStateGraph = Depends(get_llm_graph)):
+        llm: CompiledStateGraph = Depends(get_llm_graph),
+        authenticated: str = Depends(auth_user)
+):
     async def event_generator():
         accumulated = {"dialog_type": None}
 
@@ -54,8 +48,8 @@ async def stream_query(
             kind = event.get("event")
             name = event.get("name", "")
 
-            if kind == "on_chain_start" and name in NODE_STATUS_MAP:
-                yield f"data: {json.dumps({'type': 'status', 'text': NODE_STATUS_MAP[name]})}\n\n"
+            if kind == "on_chain_start" and name in NodeStatus:
+                yield f"data: {json.dumps({'type': 'status', 'text': NodeStatus[name]})}\n\n"
 
             elif kind == "on_chain_end" and name == "classification_dialog_type":
                 output = event.get("data", {}).get("output", {})

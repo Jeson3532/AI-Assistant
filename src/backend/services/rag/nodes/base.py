@@ -15,20 +15,17 @@ PROMPTS = load_prompts()
 
 
 async def classify_node(state: BasicState, llm: BaseChatModel):
-    logger.info("Классификация диалога")
     dialog_type = await get_dialog_type(llm, state['query'])
     logger.info(f"Тип диалога: {dialog_type}")
     return {"dialog_type": dialog_type}
 
 
 async def hybrid_search_node(state: BasicState, vector_store: QdrantVectorStore):
-    logger.info("Гибридный поиск")
     docs = await hybrid_search(vector_store, state['query'], state['dialog_type'])
     return {"docs": docs}
 
 
 async def rerank_docs_node(state: BasicState, reranker, tokenizer):
-    logger.info("Реранкер")
     docs = state['docs']
 
     if not docs:
@@ -46,9 +43,7 @@ async def rerank_docs_node(state: BasicState, reranker, tokenizer):
 
 
 async def generate_response_node(state: BasicState, llm: BaseChatModel):
-    logger.info("Генерация ответа")
     history = state.get("history") or []
-    logger.info(f"История диалога: {history}")
     response = await generate_response(
         llm,
         None,
@@ -61,7 +56,6 @@ async def generate_response_node(state: BasicState, llm: BaseChatModel):
 
 
 async def clarify_node(state: BasicState, llm: BaseChatModel):
-    logger.info("Уточняющий вопрос")
     response = await generate_response(
         model=llm,
         prompt=PROMPTS.get("clarify"),
@@ -73,7 +67,6 @@ async def clarify_node(state: BasicState, llm: BaseChatModel):
 
 
 async def call_operator_node(state: BasicState, llm: BaseChatModel):
-    logger.info("Вызов оператора")
     response = await generate_response(
         model=llm,
         prompt=PROMPTS.get("call_operator"),

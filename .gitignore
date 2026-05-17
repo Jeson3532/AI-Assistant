@@ -10,7 +10,6 @@ hf_cache/
 .env
 
 
-
 # mime-types
 *.m4a
 *.mp3
@@ -33,3 +32,5 @@ hf_cache/
 *.zip
 
 !README.md
+!README.txt
+!static/files

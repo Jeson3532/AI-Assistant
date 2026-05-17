@@ -52,5 +52,5 @@ async def operator_reply(msg: Message, bot: Bot):
         return
     ticket.history.append({"role": "operator", "text": msg.text})
     await bot.send_message(ticket.user_id,
-                           f"💬 <b>Сообщение от оператора</b>:\n<code>{msg.text}</code>",
+                           f"<b>Сообщение от оператора</b>:\n👨‍💼:<code> {msg.text}</code>",
                            parse_mode="html")

@@ -10,6 +10,7 @@ def get_start_keyboard():
     markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
     return markup
 
+
 def get_journal_keyboard(offset: int, total: int, limit: int = 5) -> InlineKeyboardMarkup | None:
     buttons = []
     if offset > 0:
@@ -20,3 +21,11 @@ def get_journal_keyboard(offset: int, total: int, limit: int = 5) -> InlineKeybo
     if not buttons:
         return None
     return InlineKeyboardMarkup(inline_keyboard=[buttons])
+
+
+def back_to_main_menu():
+    keyboard = [
+        [InlineKeyboardButton(text="👤 Вернуться назад", callback_data="back_to_main_menu")],
+    ]
+    markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
+    return markup

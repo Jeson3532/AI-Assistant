@@ -3,6 +3,7 @@ from src.frontend.bot.routers.callback.operator import router as operator_cb_rou
 from src.frontend.bot.routers.message.menu import router as base_menu_router
 from src.frontend.bot.routers.message.assistant import router as assistant_router
 from src.frontend.bot.routers.message.operator import router as operator_router
+from src.frontend.bot.routers.callback.util import router as util_router
 from aiogram import Router
 
 all_routers = [v for v in list(globals().values()) if isinstance(v, Router)]

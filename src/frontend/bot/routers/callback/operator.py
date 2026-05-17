@@ -41,7 +41,7 @@ async def accept_ticket(cb: CallbackQuery, state: FSMContext, bot: Bot):
         parse_mode='html'
     )
 
-    await bot.send_message(ticket.user_id, tpl.USER_OPERATOR_CONNECTED)
+    await bot.send_message(ticket.user_id, tpl.USER_OPERATOR_CONNECTED, parse_mode='html')
 
 
 @router.callback_query(F.data == "ticket_taken")

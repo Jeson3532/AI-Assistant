@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart, Command
 from src.frontend.bot.storage import tickets
@@ -7,6 +8,7 @@ from src.frontend.bot.fsm.groups import Menus
 from src.frontend.bot.utils.request import send_assistant_query, stream_assistant_query, save_dialog
 from src.frontend.bot.keyboards import operator as kb_operator
 from src.frontend.bot.templates import messages as tpl
+
 from src.frontend.bot.config import BotConfig
 
 router = Router(name='Assistant Message Router')
@@ -27,12 +29,12 @@ async def exit_chat(msg: Message, state: FSMContext):
             history=history,
         )
     await state.clear()
-    await msg.answer("Чат завершен.")
+    await msg.answer("🔴 | Чат завершен.")
 
 
 @router.message(Menus.ASSISTANT_CHAT, F.text.startswith("/"))
 async def block_commands_user(msg: Message):
-    await msg.answer("⚠️ Команды <b>недоступны</b> в режиме чата.\nДля выхода из чата используйте <b>/exit</b>",
+    await msg.answer("⚠️ | Команды <b>недоступны</b> в режиме чата.\nДля выхода из чата используйте <b>/exit</b>",
                      parse_mode='html')
 
 
@@ -44,19 +46,27 @@ async def handle_message(msg: Message, state: FSMContext):
         ticket.history.append({"role": "user", "text": msg.text})
         await msg.bot.send_message(
             ticket.operator_id,
-            f"👤 Пользователь: {msg.text}"
+            f"<b>Сообщение от пользователя:</b>\n👤:<code> {msg.text}</code>",
+            parse_mode='html'
         )
         return
 
     data = await state.get_data()
     history: list[dict] = data.get("history", [])
 
-    status_msg = await msg.answer("🔍 <b>Определяем тип обращения...</b>", parse_mode="html")
+    status_msg = await msg.answer("🔍 Определяем тип обращения...")
+    last_status = "🔍 Определяем тип обращения..."
     response = None
 
     async for event in stream_assistant_query(msg.text, history):
         if event['type'] == 'status':
-            await status_msg.edit_text(event['text'], parse_mode="html")
+            new_status = event['text']
+            if new_status != last_status:
+                try:
+                    await status_msg.edit_text(new_status, parse_mode="html")
+                    last_status = new_status
+                except TelegramBadRequest:
+                    ...
 
         elif event['type'] == 'result':
             response = event
