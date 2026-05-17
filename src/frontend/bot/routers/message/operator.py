@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
 from src.frontend.bot.fsm.groups import Operator
 from src.frontend.bot.storage import tickets as ticket_store
+from src.frontend.bot.utils.request import save_dialog
 from src.frontend.bot.templates import messages as tpl
 
 router = Router(name='Operator Message Router')
@@ -24,6 +25,16 @@ async def close_ticket(msg: Message, state: FSMContext, bot: Bot):
     ])
 
     user_id = ticket.user_id
+
+    if ticket.history:
+        await save_dialog(
+            user_id=ticket.user_id,
+            username=msg.from_user.username,
+            dialog_type=ticket.dialog_type,
+            operator=True,
+            history=ticket.history,
+        )
+
     ticket_store.close_ticket(ticket)
     await state.clear()
 

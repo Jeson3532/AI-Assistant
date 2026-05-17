@@ -44,7 +44,7 @@ async def stream_assistant_query(
 
 async def save_dialog(
         user_id: int,
-        user_name: str | None,
+        username: str | None,
         dialog_type: str | None,
         operator: bool,
         history: list[dict],
@@ -52,7 +52,7 @@ async def save_dialog(
     async with ahttp.ClientSession(base_url=BACKEND_URL) as session:
         await session.post("/history/", json={
             "user_id": user_id,
-            "user_name": user_name,
+            "username": username,
             "dialog_type": dialog_type,
             "operator": operator,
             "history": history,

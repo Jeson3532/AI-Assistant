@@ -21,7 +21,7 @@ async def exit_chat(msg: Message, state: FSMContext):
     if history:
         await save_dialog(
             user_id=msg.from_user.id,
-            user_name=msg.from_user.full_name,
+            username=msg.from_user.username,
             dialog_type=data.get("last_dialog_type"),
             operator=data.get("had_operator", False),
             history=history,
