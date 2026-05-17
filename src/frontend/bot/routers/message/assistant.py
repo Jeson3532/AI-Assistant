@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart, Command
 from src.frontend.bot.storage import tickets
 from src.frontend.bot.fsm.groups import Menus
-from src.frontend.bot.utils.request import send_assistant_query, stream_assistant_query
+from src.frontend.bot.utils.request import send_assistant_query, stream_assistant_query, save_dialog
 from src.frontend.bot.keyboards import operator as kb_operator
 from src.frontend.bot.templates import messages as tpl
 from src.frontend.bot.config import BotConfig
@@ -15,6 +15,17 @@ BOT_CONFIG = BotConfig()
 
 @router.message(Command("exit"), Menus.ASSISTANT_CHAT)
 async def exit_chat(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    history: list[dict] = data.get("history", [])
+
+    if history:
+        await save_dialog(
+            user_id=msg.from_user.id,
+            user_name=msg.from_user.full_name,
+            dialog_type=data.get("last_dialog_type"),
+            operator=data.get("had_operator", False),
+            history=history,
+        )
     await state.clear()
     await msg.answer("Чат завершен.")
 
@@ -62,7 +73,11 @@ async def handle_message(msg: Message, state: FSMContext):
 
     history.append({"role": "user", "text": msg.text})
     history.append({"role": "assistant", "text": answer})
-    await state.update_data(history=history)
+    await state.update_data(
+        history=history,
+        last_dialog_type=response.get("dialog_type"),
+        had_operator=response.get("operator", False) or data.get("had_operator", False)
+    )
 
     # создание тикета если есть вызов оператора
     if response.get('operator'):
