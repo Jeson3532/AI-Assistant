@@ -22,7 +22,6 @@ hf_cache/
 *.ogg
 *.opus
 
-*.txt
 *.exe
 *.shp
 *.log
