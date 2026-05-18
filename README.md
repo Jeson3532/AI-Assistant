@@ -154,6 +154,8 @@ AI-Assistant-main/
     │   │   ├── entry.py          # Точка входа FastAPI, инициализация RAG
     │   │   └── exceptions.py     # Обработчики ошибок
     │   │
+    │   ├── tests/  # Авто-тесты (API)
+    │   │
     │   ├── config/
     │   │   └── prompts.yaml      # Промпты для всех типов обращений
     │   │
@@ -189,8 +191,6 @@ AI-Assistant-main/
     │       ├── storage/          # In-memory хранилище тикетов
     │       ├── templates/        # Шаблоны сообщений и форматирование
     │       └── utils/request.py  # HTTP-клиент к бэкенду
-    │
-    └── tests/  # Тестирование
 ```
 
 ---
@@ -205,6 +205,7 @@ AI-Assistant-main/
 - `src/backend/services/rag/graphs/` - сборка LangGraph-графа с conditional edges
 - `src/backend/services/rag/nodes/` - реализация каждого узла графа
 - `src/backend/services/rag/search/` - гибридный поиск (dense + BM25) и cross-encoder реранкер
+- `src/backend/tests/` - тестирование API.
 
 **FRONTEND:**
 - `src/frontend/bot/routers/message/assistant.py` - обработка сообщений, стриминг статусов, создание тикетов
