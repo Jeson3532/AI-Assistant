@@ -190,7 +190,7 @@ AI-Assistant-main/
     │       ├── templates/        # Шаблоны сообщений и форматирование
     │       └── utils/request.py  # HTTP-клиент к бэкенду
     │
-    └── tests/
+    └── tests/  # Тестирование
 ```
 
 ---

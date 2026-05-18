@@ -79,14 +79,14 @@ class HistoryRepo:
             max_score_result = await self._session.execute(
                 select(func.max(DialogHistory.score)).where(DialogHistory.score.isnot(None))
             )
-            avg_score = max_score_result.scalar()
+            max_score = max_score_result.scalar()
             by_type = [{"dialog_type": row[0], "count": row[1]} for row in by_type_result.all()]
 
             return {
                 "total": total,
                 "auto_handled": auto,
                 "operator_handled": operator_count,
-                "score": avg_score,
+                "score": max_score,
                 "by_type": by_type,
             }
         except Exception:
