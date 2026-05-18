@@ -17,6 +17,7 @@ class HistoryService:
                 username=data.username,
                 dialog_type=data.dialog_type,
                 operator=data.operator,
+                score=data.score,
                 history=data.history
             )
             await self._db.history.save_dialog(dialog)

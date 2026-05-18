@@ -8,6 +8,7 @@ from src.frontend.bot.fsm.groups import Operator
 from src.frontend.bot.storage import tickets as ticket_store
 from src.frontend.bot.utils.request import save_dialog
 from src.frontend.bot.templates import messages as tpl
+from src.frontend.bot.keyboards import operator as oper_kb
 
 router = Router(name='Operator Message Router')
 
@@ -25,6 +26,7 @@ async def close_ticket(msg: Message, state: FSMContext, bot: Bot):
     ])
 
     user_id = ticket.user_id
+    ticket_id = ticket.ticket_id
 
     if ticket.history:
         await save_dialog(
@@ -39,7 +41,9 @@ async def close_ticket(msg: Message, state: FSMContext, bot: Bot):
     await state.clear()
 
     await msg.answer(
-        f"{tpl.OPERATOR_TICKET_CLOSED}\n\n<b>История диалога:</b>\n{history_text}", parse_mode="html"
+        f"{tpl.OPERATOR_TICKET_CLOSED}\n\n<b>История диалога:</b>\n{history_text}",
+        parse_mode="html",
+        reply_markup=oper_kb.get_save_to_kb_keyboard(ticket_id)
     )
     await bot.send_message(user_id, tpl.USER_OPERATOR_CLOSED, parse_mode='html')
 

@@ -11,3 +11,9 @@ def get_ticket_taken_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="❌ Тикет уже принят", callback_data="ticket_taken")
     ]])
+
+
+def get_save_to_kb_keyboard(ticket_id: int) -> InlineKeyboardMarkup:  # kb - knowledge base
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="💾 Сохранить в базу знаний", callback_data=f"save_kb_{ticket_id}")
+    ]])

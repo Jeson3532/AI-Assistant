@@ -18,7 +18,7 @@ class ModelService:
             model=model_name,
             base_url=self._config.base_url,
             temperature=temperature,
-            top_k=1
+            top_k=top_k
         )
         return llm
 

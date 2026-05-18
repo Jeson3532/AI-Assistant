@@ -8,6 +8,7 @@ from src.frontend.bot.fsm.groups import Menus
 from src.frontend.bot.utils.request import send_assistant_query, stream_assistant_query, save_dialog
 from src.frontend.bot.keyboards import operator as kb_operator
 from src.frontend.bot.templates import messages as tpl
+from src.frontend.bot.utils.log import logger
 
 from src.frontend.bot.config import BotConfig
 
@@ -27,6 +28,7 @@ async def exit_chat(msg: Message, state: FSMContext):
             dialog_type=data.get("last_dialog_type"),
             operator=data.get("had_operator", False),
             history=history,
+            score=data.get("last_score")
         )
     await state.clear()
     await msg.answer("🔴 | Чат завершен.")
@@ -65,7 +67,8 @@ async def handle_message(msg: Message, state: FSMContext):
                 try:
                     await status_msg.edit_text(new_status, parse_mode="html")
                     last_status = new_status
-                except TelegramBadRequest:
+                except TelegramBadRequest as e:
+                    logger.error(f"Ошибка TelegramBadRequest: {e}")
                     ...
 
         elif event['type'] == 'result':
@@ -79,14 +82,15 @@ async def handle_message(msg: Message, state: FSMContext):
     answer = response['model_response']
 
     await status_msg.delete()
-    await msg.answer(answer)
+    await msg.answer(answer, parse_mode="markdown")
 
     history.append({"role": "user", "text": msg.text})
     history.append({"role": "assistant", "text": answer})
     await state.update_data(
         history=history,
         last_dialog_type=response.get("dialog_type"),
-        had_operator=response.get("operator", False) or data.get("had_operator", False)
+        had_operator=response.get("operator", False) or data.get("had_operator", False),
+        last_score=response.get("score"),
     )
 
     # создание тикета если есть вызов оператора

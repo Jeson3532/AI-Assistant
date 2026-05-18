@@ -9,6 +9,7 @@ class DialogHistoryResponse(BaseModel):
     username: Optional[str]
     dialog_type: Optional[str]
     operator: bool
+    score: float | None = None
     history: list[dict]
     finished_at: datetime
 
@@ -25,6 +26,7 @@ class AnalyticsResponse(BaseModel):
     total: int
     auto_handled: int
     operator_handled: int
+    score: float | None
     by_type: list[DialogTypeStats]
 
 

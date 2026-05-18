@@ -8,4 +8,5 @@ class DialogHistoryModel(BaseModel):
     username: Optional[str] = Field(None)
     dialog_type: Optional[str] = Field(None)
     operator: bool = Field(False)
+    score: Optional[float] = Field(None)
     history: list[dict] = Field(...)

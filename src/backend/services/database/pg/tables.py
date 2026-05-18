@@ -30,4 +30,6 @@ class DialogHistory(Base):
     dialog_type: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     operator: Mapped[bool] = mapped_column(Boolean, default=False)
     history: Mapped[dict] = mapped_column(JSON, nullable=False)
+    score: Mapped[Optional[float]] = mapped_column(Float, nullable=True,
+                                                   comment='Уверенность ответа при ранжировании (max)')
     finished_at: Mapped[datetime] = mapped_column(server_default=func.now())

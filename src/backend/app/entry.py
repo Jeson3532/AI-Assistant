@@ -19,9 +19,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # init db tables (test, в проде миграции)
-    # await init_db()
-    ### блок работы с инициализацией инструментов RAG-пайплайна
+    # блок работы с инициализацией инструментов RAG-пайплайна
     app.state.prompts = load_prompts()
     logger.info("Загрузка qdrant...")
     # загрузка клиентов
@@ -36,12 +34,12 @@ async def lifespan(app: FastAPI):
     app.state.qdrant_async_client = async_qdrant_client
     logger.info("Qdrant загружен...")
 
-    # Инициализация моделей и сборка RAG-графа
+    # инициализация моделей и сборка RAG-графа
     model_service = ModelService()
 
     # загрузка основной модели
     logger.info("Загрузка ML-моделей...")
-    llm = model_service.load_model(model_name='qwen2.5:1.5b', temperature=0.7, top_k=40)
+    llm = model_service.load_model(model_name='qwen2.5:3b', temperature=0.7, top_k=40)
     classifier_llm = model_service.load_model(model_name="qwen2.5:1.5b", temperature=0.0)
 
     logger.info("Основная модель загружена")
@@ -57,7 +55,7 @@ async def lifespan(app: FastAPI):
     # сборка графа
     app.state.llm_graph = build_graph(reranker, tokenizer, BasicState, llm, classifier_llm, vectorstore)
 
-    ### блок компонентов FastAPI
+    # блок компонентов FastAPI
     logger.info("Загрузка роутеров...")
     for router in routers:
         app.include_router(router)

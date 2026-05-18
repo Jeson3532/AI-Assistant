@@ -50,6 +50,7 @@ async def save_dialog(
         dialog_type: str | None,
         operator: bool,
         history: list[dict],
+        score: float | None = None,
 ):
     async with ahttp.ClientSession(base_url=BACKEND_URL) as session:
         await session.post("/history/", headers={"x-secret-key": BACKEND_SECRET}, json={
@@ -57,6 +58,7 @@ async def save_dialog(
             "username": username,
             "dialog_type": dialog_type,
             "operator": operator,
+            "score": score,
             "history": history,
         })
 
@@ -87,3 +89,17 @@ async def get_journal(
             if response.status != 200:
                 raise RuntimeError(f"Ошибка {response.status}: {await response.text()}")
             return await response.json()
+
+
+async def upload_doc(
+        title: str,
+        content: str,
+        dialog_type: str | None,
+) -> None:
+    async with ahttp.ClientSession(base_url=BACKEND_URL, headers={"x-secret-key": BACKEND_SECRET}) as session:
+        await session.post("/docs/", json={
+            "title": title,
+            "content": content,
+            "type": dialog_type or "other",
+            "chunk_size": 500,
+        })
