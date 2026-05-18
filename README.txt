@@ -35,7 +35,7 @@
 ### Шаг 1 - Клонируйте репозиторий
 
 ```bash
-git clone git@github.com:Jeson3532/AI-Assistant.git && cd AI-Assistant-main
+git clone git@github.com:Jeson3532/AI-Assistant.git && cd AI-Assistant
 ```
 
 ### Шаг 2 - Установите Docker Desktop
